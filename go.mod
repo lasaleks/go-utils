@@ -1,4 +1,4 @@
-module ie_common_utils_go
+module github.com/lasaleks/ie_common_utils_go
 
 go 1.19
 
