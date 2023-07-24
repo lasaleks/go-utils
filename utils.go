@@ -1,4 +1,4 @@
-package iecommonutilsgo
+package ie_common_utils_go
 
 import (
 	"context"
