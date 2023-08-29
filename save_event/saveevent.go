@@ -6,7 +6,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"bitbucket.org/lasaleks/gormq3"
+	"github.com/lasaleks/gormq"
 )
 
 type Event struct {
@@ -17,12 +17,12 @@ type Event struct {
 	ListContext  [][3]interface{} `json:"list_context"`
 }
 
-func SaveEvents(out chan<- gormq3.MessageAmpq, system_key string, ev Event) error {
+func SaveEvents(out chan<- gormq.MessageAmpq, system_key string, ev Event) error {
 	data, err := json.Marshal(ev)
 	if err != nil {
 		return err
 	}
-	out <- gormq3.MessageAmpq{
+	out <- gormq.MessageAmpq{
 		Exchange:     "QPDB",
 		Routing_key:  fmt.Sprintf("events.save.%s", system_key),
 		Content_type: "text/plain",
