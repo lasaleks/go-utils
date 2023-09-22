@@ -23,8 +23,8 @@ type User struct {
 	//"{\"id\": 8, \"password\": \"c4ca4238a0b923820dcc509a6f75849b\", \"last_login\": \"2020-11-25T06:48:12Z\", \"is_superuser\": false, \"username\": \"user\", \"first_name\": \"\", \"last_name\": \"\", \"email\": \"\", \"is_staff\": false, \"is_active\": true, \"date_joined\": \"2020-07-06T08:47:16Z\"}"
 }
 
-func GetDjangoUser(ctx context.Context, user_id int64, redis_cli_db1 *redis.Client) (user *User, err error) {
-	json_data, err := redis_cli_db1.HGet(ctx, "django.auth.user", fmt.Sprintf("%d", user_id)).Result()
+func GetDjangoUser(ctx context.Context, user_id int64, redis_cli *redis.Client) (user *User, err error) {
+	json_data, err := redis_cli.HGet(ctx, "django.auth.user", fmt.Sprintf("%d", user_id)).Result()
 	if err != nil {
 		return nil, err
 	}
