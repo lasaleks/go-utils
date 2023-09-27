@@ -9,9 +9,13 @@ import (
 	"github.com/nlpodyssey/gopickle/pickle"
 	"github.com/nlpodyssey/gopickle/types"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
-var userIDKey = "user_id"
+type keyContext int
+
+const userIDKey keyContext = 1
 
 func SessionMiddleware(next http.Handler, rdb1 *redis.Client) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +54,7 @@ func SessionMiddleware(next http.Handler, rdb1 *redis.Client) http.Handler {
 		}
 		user_id_str, ok := user_id_i.(string)
 		if ok {
-			user_id, err = strconv.ParseInt(user_id_str, 10, 32)
+			user_id, err = strconv.ParseInt(user_id_str, 10, 64)
 			if err != nil {
 				http.Error(w, fmt.Sprintf("no auth at %s", r.URL.Path), http.StatusUnauthorized)
 				return
@@ -65,7 +69,8 @@ func SessionMiddleware(next http.Handler, rdb1 *redis.Client) http.Handler {
 func ChkPermMiddleware(next http.Handler, rdb *redis.Client, perm string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		ismem, err := rdb.SIsMember(ctx, fmt.Sprintf("auth.user.permission.%v", ctx.Value(userIDKey)), perm).Result()
+		user_id := ctx.Value(userIDKey)
+		ismem, err := rdb.SIsMember(ctx, fmt.Sprintf("auth.user.permission.%v", user_id), perm).Result()
 		if err != nil || !ismem {
 			http.Error(w, fmt.Sprintf("access denied %s", r.URL.Path), http.StatusForbidden)
 			return
@@ -73,3 +78,64 @@ func ChkPermMiddleware(next http.Handler, rdb *redis.Client, perm string) http.H
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+func UserIdInterceptor(
+	ctx context.Context,
+	method string,
+	req interface{},
+	reply interface{},
+	cc *grpc.ClientConn,
+	invoker grpc.UnaryInvoker,
+	opts ...grpc.CallOption,
+) error {
+	mdOut := metadata.Pairs(
+		"user_id", fmt.Sprintf("%d", ctx.Value(userIDKey)),
+	)
+	callContext := metadata.NewOutgoingContext(ctx, mdOut)
+	err := invoker(callContext, method, req, reply, cc, opts...)
+	return err
+}
+
+/*
+func AccessLogInterceptor(
+	ctx context.Context,
+	method string,
+	req interface{},
+	reply interface{},
+	cc *grpc.ClientConn,
+	invoker grpc.UnaryInvoker,
+	opts ...grpc.CallOption,
+) error {
+	md,_:=metadata.FromOutgoingContext(ctx)
+	start:=time.Now()
+
+	var traceId,userId,userRole string
+	if len(md["authorization"])>0{
+		tokenString:= md["authorization"][0]
+		if tokenString!=""{
+			err,token:=userService.CheckGetJWTToken(tokenString)
+			if err!=nil{
+				return err
+			}
+			userId=fmt.Sprintf("%s",token["UserID"])
+			userRole=fmt.Sprintf("%s",token["UserRole"])
+		}
+	}
+	//Присваиваю ID запроса
+	traceId=fmt.Sprintf("%d",time.Now().UTC().UnixNano())
+
+	callContext:=context.Background()
+	mdOut:=metadata.Pairs(
+		"trace-id",traceId,
+		"user-id",userId,
+		"user-role",userRole,
+	)
+	callContext=metadata.NewOutgoingContext(callContext,mdOut)
+
+	err:=invoker(callContext,method,req,reply,cc, opts...)
+
+	msg:=fmt.Sprintf("Call:%v, traceId: %v, userId: %v, userRole: %v, time: %v", method,traceId,userId,userRole,time.Since(start))
+	app.AccesLog(msg)
+
+	return err
+}*/
