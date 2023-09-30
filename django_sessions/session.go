@@ -96,6 +96,7 @@ func UserIdInterceptor(
 	return err
 }
 
+// example https://github.com/msa-library/blog/blob/master/services/api-gw/main.go
 /*
 func AccessLogInterceptor(
 	ctx context.Context,
