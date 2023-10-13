@@ -61,7 +61,7 @@ func (conf *ConfigSrv) ParseConfig(pathfile string) error {
 	if len(tz) == 0 {
 		tz = "Asia/Novokuznetsk"
 	}
-	conf.TIME_ZONE = getEnv("TIMEZONE", tz)
+	conf.TIME_ZONE = getEnv("TIME_ZONE", tz)
 	return nil
 }
 
