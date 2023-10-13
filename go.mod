@@ -6,7 +6,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/lasaleks/gormq v1.0.3
 	github.com/nlpodyssey/gopickle v0.2.0
-	github.com/redis/go-redis/v9 v9.0.5
+	github.com/redis/go-redis/v9 v9.2.1
 	google.golang.org/grpc v1.58.2
 	gopkg.in/yaml.v2 v2.4.0
 )

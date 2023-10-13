@@ -1,4 +1,4 @@
-package ie_common_utils_go
+package goutils
 
 import (
 	"context"
