@@ -2,6 +2,7 @@ package configsrv
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -58,13 +59,18 @@ func (conf *ConfigSrv) ParseConfig(pathfile string) error {
 		return fmt.Errorf("unmarshal: %s err   #%v ", pathfile, err)
 	}
 	tz := conf.TIME_ZONE
+	if value, exists := os.LookupEnv("TIME_ZONE"); exists {
+		tz = value
+		log.Printf("TIME_ZONE:%s  from environment variables", tz)
+	}
 	if len(tz) == 0 {
 		tz = "Asia/Novokuznetsk"
 	}
-	conf.TIME_ZONE = getEnv("TIME_ZONE", tz)
+	conf.TIME_ZONE = tz
 	return nil
 }
 
+/*
 func getEnv(key string, defaultVal string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
@@ -72,3 +78,4 @@ func getEnv(key string, defaultVal string) string {
 
 	return defaultVal
 }
+*/
