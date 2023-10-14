@@ -52,11 +52,11 @@ type ConfigSrv struct {
 func (conf *ConfigSrv) ParseConfig(pathfile string) error {
 	yamlFile, err := os.ReadFile(pathfile)
 	if err != nil {
-		return fmt.Errorf("yamlFile.Get err   #%v ", err)
+		return fmt.Errorf("configsrv yamlFile.Get err   #%v, pathfile:%s", err, pathfile)
 	}
 	err = yaml.Unmarshal(yamlFile, conf)
 	if err != nil {
-		return fmt.Errorf("unmarshal: %s err   #%v ", pathfile, err)
+		return fmt.Errorf("configsrv unmarshal: %s err   #%v ", pathfile, err)
 	}
 	tz := conf.TIME_ZONE
 	if value, exists := os.LookupEnv("TIME_ZONE"); exists {
