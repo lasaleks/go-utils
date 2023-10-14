@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"gopkg.in/yaml.v2"
 )
@@ -61,12 +62,33 @@ func (conf *ConfigSrv) ParseConfig(pathfile string) error {
 	tz := conf.TIME_ZONE
 	if value, exists := os.LookupEnv("TIME_ZONE"); exists {
 		tz = value
-		log.Printf("TIME_ZONE:%s  from environment variables", tz)
+		log.Printf("TIME_ZONE:%s read from environment variables TIME_ZONE", tz)
 	}
 	if len(tz) == 0 {
 		tz = "Asia/Novokuznetsk"
 	}
 	conf.TIME_ZONE = tz
+	if value, exists := os.LookupEnv("WORKING_SHIFT_BEGIN_FIRST"); exists {
+		if v, err := strconv.ParseInt(value, 10, 32); err == nil {
+			conf.WORKINGSHIFT.BEGINING_FIRST_SHIFT = int(v)
+			log.Printf("WorkingShift.BeginingFirstShift:%d read from environment variables WORKING_SHIFT_BEGIN_FIRST", v)
+		} else {
+			log.Printf("Benvironment variables WORKING_SHIFT_BEGIN_FIRST error %s", err)
+		}
+	}
+	if value, exists := os.LookupEnv("WORKING_SHIFT_NOF"); exists {
+		if v, err := strconv.ParseInt(value, 10, 32); err == nil {
+			conf.WORKINGSHIFT.NUMBEROFSHIFT = int(v)
+			log.Printf("WorkingShift.NumberOfShift:%d read from environment variables WORKING_SHIFT_NOF", v)
+		} else {
+			log.Printf("Benvironment variables WORKING_SHIFT_NOF error %s", err)
+		}
+	}
+	/*
+		TIME_ZONE
+		WORKING_SHIFT_BEGIN_FIRST
+		WORKING_SHIFT_NOF
+	*/
 	return nil
 }
 
